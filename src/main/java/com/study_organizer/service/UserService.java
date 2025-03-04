@@ -1,8 +1,10 @@
 package com.study_organizer.service;
 
+import com.study_organizer.exception.CustomException;
 import com.study_organizer.model.User;
 import com.study_organizer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,5 +38,10 @@ public class UserService implements UserDetailsService {
 
     public boolean usernameExists(String username) {
         return userRepository.findByUsername(username).isPresent();
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND.value()));
     }
 }
