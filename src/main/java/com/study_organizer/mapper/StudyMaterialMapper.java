@@ -16,5 +16,6 @@ public class StudyMaterialMapper {
         material.setLink(materialDTO.getLink());
         material.setAdditionalInfo(materialDTO.getAdditionalInfo());
         return material;
+
     }
 }
