@@ -1,6 +1,5 @@
 package com.study_organizer.service;
 
-
 import com.study_organizer.model.User;
 import com.study_organizer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,12 @@ public class UserService implements UserDetailsService {
     }
 
     public void saveUser(User user) {
+        // Criptografa a senha antes de salvar no banco de dados
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+    }
+
+    public boolean usernameExists(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 }
