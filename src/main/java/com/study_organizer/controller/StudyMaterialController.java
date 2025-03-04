@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.study_organizer.dto.StudyMaterialDTO;
+import com.study_organizer.mapper.StudyMaterialMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,9 @@ public class StudyMaterialController {
 
     @Autowired
     private StudyMaterialService studyMaterialService;
+
+    @Autowired
+    private StudyMaterialMapper studyMaterialMapper;
 
     @GetMapping
     public List<StudyMaterial> getAllMaterials() {
@@ -37,14 +41,7 @@ public class StudyMaterialController {
 
     @PostMapping
     public ResponseEntity<StudyMaterial> createMaterial(@Valid @RequestBody StudyMaterialDTO materialDTO) {
-        StudyMaterial material = new StudyMaterial();
-        material.setSubject(materialDTO.getSubject());
-        material.setCourseName(materialDTO.getCourseName());
-        material.setAuthor(materialDTO.getAuthor());
-        material.setDate(materialDTO.getDate());
-        material.setLink(materialDTO.getLink());
-        material.setAdditionalInfo(materialDTO.getAdditionalInfo());
-
+        StudyMaterial material = studyMaterialMapper.toEntity(materialDTO);
         StudyMaterial savedMaterial = studyMaterialService.saveMaterial(material);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedMaterial);
     }
