@@ -15,8 +15,10 @@ import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
 @AutoConfigureMockMvc
+
+@SpringBootTest(properties = "spring.profiles.active=test")
+
 public class StudyMaterialControllerIntegrationTest {
 
     @Autowired
