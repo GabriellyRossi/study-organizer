@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -15,10 +16,9 @@ import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@SpringBootTest
 @AutoConfigureMockMvc
-
-@SpringBootTest(properties = "spring.profiles.active=test")
-
+@ActiveProfiles("test") // Ativa o perfil "test"
 public class StudyMaterialControllerIntegrationTest {
 
     @Autowired
@@ -112,4 +112,3 @@ public class StudyMaterialControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 }
-
