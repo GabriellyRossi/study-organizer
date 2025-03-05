@@ -2,12 +2,15 @@ package com.study_organizer.integration;
 
 import com.study_organizer.model.StudyMaterial;
 import com.study_organizer.repository.StudyMaterialRepository;
+import com.study_organizer.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -27,9 +30,21 @@ public class StudyMaterialControllerIntegrationTest {
     @Autowired
     private StudyMaterialRepository studyMaterialRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    private String token;
+
     @BeforeEach
-    public void cleanup() {
+    public void setup() {
         studyMaterialRepository.deleteAll(); // Limpa o banco de dados antes de cada teste
+
+        // Gera um token JWT para autenticação
+        UserDetails userDetails = userDetailsService.loadUserByUsername("seuUsuario"); // Substitua pelo usuário válido
+        token = jwtUtil.generateToken(userDetails);
     }
 
     @Test
@@ -46,6 +61,7 @@ public class StudyMaterialControllerIntegrationTest {
             """;
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/materials")
+                        .header("Authorization", "Bearer " + token) // Adiciona o token JWT no cabeçalho
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(materialJson))
                 .andExpect(status().isCreated())
@@ -65,7 +81,8 @@ public class StudyMaterialControllerIntegrationTest {
 
         StudyMaterial savedMaterial = studyMaterialRepository.save(material);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/{id}", savedMaterial.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/{id}", savedMaterial.getId())
+                        .header("Authorization", "Bearer " + token)) // Adiciona o token JWT no cabeçalho
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subject").value("Java"))
                 .andExpect(jsonPath("$.courseName").value("Spring Boot Basics"));
@@ -73,7 +90,8 @@ public class StudyMaterialControllerIntegrationTest {
 
     @Test
     public void testGetMaterialById_NotFound() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/{id}", 999L))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/{id}", 999L)
+                        .header("Authorization", "Bearer " + token)) // Adiciona o token JWT no cabeçalho
                 .andExpect(status().isNotFound());
     }
 
@@ -90,7 +108,8 @@ public class StudyMaterialControllerIntegrationTest {
         studyMaterialRepository.save(material1);
         studyMaterialRepository.save(material2);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/subject/{subject}", "Java"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/subject/{subject}", "Java")
+                        .header("Authorization", "Bearer " + token)) // Adiciona o token JWT no cabeçalho
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].subject").value("Java"))
@@ -105,10 +124,12 @@ public class StudyMaterialControllerIntegrationTest {
 
         StudyMaterial savedMaterial = studyMaterialRepository.save(material);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/materials/{id}", savedMaterial.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/materials/{id}", savedMaterial.getId())
+                        .header("Authorization", "Bearer " + token)) // Adiciona o token JWT no cabeçalho
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/{id}", savedMaterial.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/materials/{id}", savedMaterial.getId())
+                        .header("Authorization", "Bearer " + token)) // Adiciona o token JWT no cabeçalho
                 .andExpect(status().isNotFound());
     }
 }
